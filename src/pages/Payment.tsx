@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, CreditCard, Lock, Calendar, Shield } from 'lucide-react';
+import { ArrowLeft, CreditCard, Lock, Calendar, Shield, Smartphone } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Payment: React.FC = () => {
@@ -18,11 +18,13 @@ const Payment: React.FC = () => {
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi'>('card');
   const [paymentForm, setPaymentForm] = useState({
     cardNumber: '',
     expiryDate: '',
     cvv: '',
     cardholderName: '',
+    upiId: '',
   });
 
   const handlePayment = async (e: React.FormEvent) => {
@@ -117,55 +119,105 @@ const Payment: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handlePayment} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber">Card Number</Label>
-                  <Input
-                    id="cardNumber"
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    value={paymentForm.cardNumber}
-                    onChange={(e) => setPaymentForm(prev => ({ ...prev, cardNumber: e.target.value }))}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cardholderName">Cardholder Name</Label>
-                  <Input
-                    id="cardholderName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={paymentForm.cardholderName}
-                    onChange={(e) => setPaymentForm(prev => ({ ...prev, cardholderName: e.target.value }))}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiryDate">Expiry Date</Label>
-                    <Input
-                      id="expiryDate"
-                      type="text"
-                      placeholder="MM/YY"
-                      value={paymentForm.expiryDate}
-                      onChange={(e) => setPaymentForm(prev => ({ ...prev, expiryDate: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvv">CVV</Label>
-                    <Input
-                      id="cvv"
-                      type="text"
-                      placeholder="123"
-                      value={paymentForm.cvv}
-                      onChange={(e) => setPaymentForm(prev => ({ ...prev, cvv: e.target.value }))}
-                      required
-                    />
+              <form onSubmit={handlePayment} className="space-y-6">
+                {/* Payment Method Selection */}
+                <div className="space-y-3">
+                  <Label>Payment Method</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      type="button"
+                      variant={paymentMethod === 'card' ? 'default' : 'outline'}
+                      onClick={() => setPaymentMethod('card')}
+                      className="flex items-center gap-2 h-12"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      Credit/Debit Card
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={paymentMethod === 'upi' ? 'default' : 'outline'}
+                      onClick={() => setPaymentMethod('upi')}
+                      className="flex items-center gap-2 h-12"
+                    >
+                      <Smartphone className="w-4 h-4" />
+                      UPI
+                    </Button>
                   </div>
                 </div>
+
+                {/* Credit Card Form */}
+                {paymentMethod === 'card' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber">Card Number</Label>
+                      <Input
+                        id="cardNumber"
+                        type="text"
+                        placeholder="1234 5678 9012 3456"
+                        value={paymentForm.cardNumber}
+                        onChange={(e) => setPaymentForm(prev => ({ ...prev, cardNumber: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cardholderName">Cardholder Name</Label>
+                      <Input
+                        id="cardholderName"
+                        type="text"
+                        placeholder="John Doe"
+                        value={paymentForm.cardholderName}
+                        onChange={(e) => setPaymentForm(prev => ({ ...prev, cardholderName: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="expiryDate">Expiry Date</Label>
+                        <Input
+                          id="expiryDate"
+                          type="text"
+                          placeholder="MM/YY"
+                          value={paymentForm.expiryDate}
+                          onChange={(e) => setPaymentForm(prev => ({ ...prev, expiryDate: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cvv">CVV</Label>
+                        <Input
+                          id="cvv"
+                          type="text"
+                          placeholder="123"
+                          value={paymentForm.cvv}
+                          onChange={(e) => setPaymentForm(prev => ({ ...prev, cvv: e.target.value }))}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* UPI Form */}
+                {paymentMethod === 'upi' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="upiId">UPI ID</Label>
+                      <Input
+                        id="upiId"
+                        type="text"
+                        placeholder="yourname@paytm"
+                        value={paymentForm.upiId}
+                        onChange={(e) => setPaymentForm(prev => ({ ...prev, upiId: e.target.value }))}
+                        required
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Enter your UPI ID (e.g., name@paytm, name@googlepay, name@phonepe)
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground pt-4">
                   <Lock className="w-4 h-4" />
